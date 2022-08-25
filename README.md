@@ -34,9 +34,9 @@ The script will run and store the csv file containing the results of the analysi
 Using the pre-analysis state would allow a user to change the version of the data used for the analyis, e.g. use another version of VeBiDraCor or even another one of the DraCor corpora. This can be achived by changing the image of the `api` service [here](https://github.com/dracor-org/small-world-paper/blob/develop/docker-compose.pre.yml#L4) and possibly setting the environment variable `DRACOR_CORPUSNAME` in the part defining the `rstudio` service accordingly.
 
 ### (2) Post-analysis state
-To setup the environment in the state after the analysis was run use the command `docker-compose -f docker-compose.post.yml up`.
+To setup the environment in the state after the analysis was run use the command `docker-compose -f docker-compose.post.yml up`. The workspace was saved as `smallworlds-workspace.RData` in RStudio in the container. Use this file to restore the workspace to the state after the script was executed.
 
 ### Creating and pushing a post-analysis image to dockerhub
 
-We propose the following workflow to store the state after the analysis was run: after commiting the `results.csv` to the repository, get the short HEAD hash to use as tag for the container as well `git rev-parse --short HEAD` To get the id of the container use `docker ps | grep smallworld`; then commit the container and tag it using the commit hash as version-tag:
+We propose the following workflow to store the state after the analysis was run: after commiting the `results.csv` to the repository, get the short HEAD hash to use as tag for the container as well `git rev-parse --short HEAD` Stop the container running RStudio. To get the id of the container use `docker ps -a | grep smallworld`; then commit the container and tag it using the commit hash as version-tag:
 `docker commit -m "ran analysis, created results.csv based on commit {commithash}" {container-id} ingoboerner/smallworld-rstudio:{commithash}`. Push the image to dockerhub: `docker push ingoboerner/smallworld-rstudio:{commithash}`
