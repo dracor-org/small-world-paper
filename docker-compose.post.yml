@@ -16,8 +16,6 @@ services:
       - PASSWORD=smallworld
       - DRACOR_APIBASE=http://api:8080/exist/restxq/
       - DRACOR_CORPUSNAME=vebi
-    volumes:
-      - ./results:/home/rstudio/results
     ports:
       - "8787:8787"
     depends_on:
