@@ -245,5 +245,8 @@ vb_metadata$SFT_RusDraCor <- ifelse((vb_metadata$analysis12_pl > vb_metadata$ana
                                       (vb_metadata$analysis12_pl > vb_metadata$analysis12_lin) &
                                       (vb_metadata$analysis12_pl > vb_metadata$analysis12_quad), TRUE, FALSE)
 
-# store the results to the results folder
+# store the results to the results folder (will be synchronized to the host machine if using the docker-compose.pre.yml setup)
 write.csv(vb_metadata, file = "results/results.csv")
+
+# store the results.csv file inside the RStudio environment (needed if using the docker-compose.post.yml setup)
+write.csv(vb_metadata, file = "results.csv")
