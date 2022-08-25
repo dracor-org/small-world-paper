@@ -1,0 +1,24 @@
+version: '2'
+services:
+  api:
+    image: ingoboerner/vebidracor-api:3.0.0
+    ports:
+      - "8080:8080"
+  frontend:
+    image: ingoboerner/dracor-frontend:v1.4.3_local
+    ports:
+      - "8088:80"
+    depends_on:
+      - api
+  rstudio:
+    image: "ingoboerner/smallworld-rstudio:c34cf0c"
+    environment:
+      - PASSWORD=smallworld
+      - DRACOR_APIBASE=http://api:8080/exist/restxq/
+      - DRACOR_CORPUSNAME=vebi
+    volumes:
+      - ./results:/home/rstudio/results
+    ports:
+      - "8787:8787"
+    depends_on:
+      - api
