@@ -27,7 +27,7 @@ To setup the environment in the state before the analysis was run use the comman
 * DraCor frontend http://localhost:8088
 * RStudio server instance (using a Docker image from the [Rocker Project](https://rocker-project.org)) with the packages pre-installed. It can be accessed at http://localhost:8787 (user: `rstudio` password: `smallworld`)
 
-The script `api_script.R` used to generate the metics for the plays is loaded to RStudio container. From inside RStudio the VeBiDraCor container and the API of thecan be reached via http://frontend:80/api/info or http://api:8080/exist/restxq/info. The provided docker-compose file will set the environment variable accordingly.
+The script `smallworlds-script.R` used to generate the metics for the plays is loaded to RStudio container. From inside RStudio the VeBiDraCor container and the API of thecan be reached via http://frontend:80/api/info or http://api:8080/exist/restxq/info. The provided docker-compose file will set the environment variable accordingly.
 
 The script will run and store the csv file containing the results of the analysis `results.csv` in the folder `results` which is mapped to the host machine.
 
