@@ -29,7 +29,7 @@ To setup the environment in the state before the analysis was run use the comman
 
 The script `smallworlds-script.R` used to generate the metics for the plays is loaded to RStudio container. From inside RStudio the VeBiDraCor container and the API of thecan be reached via http://frontend:80/api/info or http://api:8080/exist/restxq/info. The provided docker-compose file will set the environment variable accordingly.
 
-The script will run and store the csv file containing the results of the analysis `results.csv` in the folder `results` which is mapped to the host machine.
+The script will run and store the csv file containing the results of the analysis `results.csv` in the folder `export` which is mapped to the `results` folder on the host machine.
 
 Using the pre-analysis state would allow a user to change the version of the data used for the analyis, e.g. use another version of VeBiDraCor or even another one of the DraCor corpora. This can be achived by changing the image of the `api` service [here](https://github.com/dracor-org/small-world-paper/blob/develop/docker-compose.pre.yml#L4) and possibly setting the environment variable `DRACOR_CORPUSNAME` in the part defining the `rstudio` service accordingly.
 
