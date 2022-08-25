@@ -1,2 +1,7 @@
-# small-world-paper
-Small World Paper
+# Detecting Small Worlds in a Corpus of Thousands of Theater Plays – A DraCor Study in Comparative Literary Network Analysis
+
+This repository contains the code and data used for the paper presented at the "Workshop on Computational Drama Analysis" (September 2022) at Cologne University.
+
+## Abstract
+
+While homogenized TEI corpora of plays from different languages are becoming more and more available, there has been almost no comparative research on plays in the field of Computational Literary Studies (CLS). Yet the approach of formal network analysis, which has been elaborated in recent years in particular with focus on theatre plays, bears huge potential for comparative research due to its modeling of texts as asemantic structures. An attempt to integrate the paradigm of such a formal analysis with general network research on the one hand and literary history on the other hand is the approach of a typification of networks with respect to the “Small World” concept. However, studies have so far remained limited to smaller and monolingual corpora. In this study, we conceptualize different operationalizations of the “Small World” concept and apply the measures to a quite huge, DraCor based corpus of almost 3000 plays. Looking at the results of these analyses, we examine how the different operationalizations of the “Small World” concept relate to each other and discuss how they could be used for a network-based typology of dramatic forms. We finally develop initial ideas for a network-grounded history of dramatic forms in a transnational perspective.
