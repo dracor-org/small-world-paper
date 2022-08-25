@@ -8,7 +8,7 @@ ENV CORPUSNAME=vebi
 RUN R -e "install.packages(c('purrr', 'igraph', 'stringr', 'jsonlite'))"
 #add the script to use in R Studio server instance
 ADD smallworlds-script.R  /home/rstudio/smallworlds-script.R
-#create a folder for the results
-RUN mkdir /home/rstudio/results
+#create an export folder for the results
+RUN mkdir /home/rstudio/export
 #expose the port
 EXPOSE 8787

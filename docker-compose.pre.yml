@@ -20,7 +20,7 @@ services:
       - DRACOR_APIBASE=http://api:8080/exist/restxq/
       - DRACOR_CORPUSNAME=vebi
     volumes:
-      - ./results:/home/rstudio/results
+      - ./results:/home/rstudio/export
     ports:
       - "8787:8787"
     depends_on:
