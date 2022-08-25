@@ -11,7 +11,7 @@ services:
     depends_on:
       - api
   rstudio:
-    image: "ingoboerner/smallworld-rstudio:c34cf0c"
+    image: "ingoboerner/smallworld-rstudio:68831d5"
     environment:
       - PASSWORD=smallworld
       - DRACOR_APIBASE=http://api:8080/exist/restxq/
