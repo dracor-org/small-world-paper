@@ -35,3 +35,8 @@ Using the pre-analysis state would allow a user to change the version of the dat
 
 ### (2) Post-analysis state
 (todo)
+
+### Creating and pushing a post-analysis image to dockerhub
+
+We propose the following workflow to store the state after the analysis was run: after commiting the `results.csv` to the repository, get the short HEAD hash to use as tag for the container as well `git rev-parse --short HEAD` To get the id of the container use `docker ps | grep smallworld`; then commit the container and tag it using the commit hash as version-tag:
+`docker commit -m "ran analysis, created results.csv based on commit {commithash}" {container-id} ingoboerner/smallworld-rstudio:{commithash}`. Push the image to dockerhub: `docker push ingoboerner/smallworld-rstudio:{commithash}`
