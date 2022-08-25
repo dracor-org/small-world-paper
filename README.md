@@ -2,7 +2,7 @@
 
 This repository contains the code and data used for the paper presented at the "Workshop on Computational Drama Analysis" (September 2022) at Cologne University.
 
-The branch [`conference-version`](https://github.com/dracor-org/small-world-paper/tree/conference-version) for script and data used for the analyis. The branch [`develop`](https://github.com/dracor-org/small-world-paper/tree/develop) contains the current state of the workflow creating a fully reproducible study using Docker and the "Programmable Corpus" prototype of our Very Big Drama Corpus [VeBiDraCor](https://github.com/dracor-org/vebidracor).
+Use the branch [`conference-version`](https://github.com/dracor-org/small-world-paper/tree/conference-version) for script and data used for the analyis. The branch [`develop`](https://github.com/dracor-org/small-world-paper/tree/develop) contains the current state of the workflow creating a fully reproducible study using Docker and the "Programmable Corpus" prototype of our Very Big Drama Corpus [VeBiDraCor](https://github.com/dracor-org/vebidracor).
 
 ## Abstract
 
