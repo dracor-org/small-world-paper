@@ -34,7 +34,7 @@ The script will run and store the csv file containing the results of the analysi
 Using the pre-analysis state would allow a user to change the version of the data used for the analyis, e.g. use another version of VeBiDraCor or even another one of the DraCor corpora. This can be achived by changing the image of the `api` service [here](https://github.com/dracor-org/small-world-paper/blob/develop/docker-compose.pre.yml#L4) and possibly setting the environment variable `DRACOR_CORPUSNAME` in the part defining the `rstudio` service accordingly.
 
 ### (2) Post-analysis state
-(todo)
+To setup the environment in the state after the analysis was run use the command `docker-compose -f docker-compose.post.yml up`.
 
 ### Creating and pushing a post-analysis image to dockerhub
 
