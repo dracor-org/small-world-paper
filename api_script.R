@@ -1,21 +1,35 @@
+# import packages
 library("purrr")
 library("igraph")
 library("stringr")
 library("jsonlite")
 
+# Get information on package versions
+sessionInfo()
+
 set.seed(42)
 
+# set API baseurl to value of the evironment variable defined in the Dockerfile/docker-compose file
 baseurl <- Sys.getenv("DRACOR_APIBASE")
 
+# to run the script locally without Docker and use a local VeBiDraCor instance, set the baseurl to the localhost
 if (baseurl == '') {
   baseurl = "http://localhost:8088/api/"
 }
 
-list_of_names <- fromJSON(paste0(baseurl, "corpora/vebi"))
+# set corpusname to the value of the environment variable defined in the Dockerfile/docker-compose file
+corpusname <- Sys.getenv("DRACOR_CORPUSNAME")
+
+if (corpusname == '') {
+  corpusname = "vebi"
+}
+
+
+list_of_names <- fromJSON(paste0(baseurl, "corpora/", corpusname))
 sorted_names <- list_of_names$dramas$name[sort.list(list_of_names$dramas$id)]
 
 get_network_data_per_play <- function(play_name){
-  json <- fromJSON(paste0(baseurl, "corpora/vebi/play/", play_name, "/metrics"))
+  json <- fromJSON(paste0(baseurl, "corpora/", corpusname, "/play/", play_name, "/metrics"))
   nodes_data <- json[["nodes"]]
   nodes_data
 }
@@ -23,7 +37,7 @@ get_network_data_per_play <- function(play_name){
 vb_metrics <- lapply(sorted_names, get_network_data_per_play)
 
 options(timeout=500)
-vb_metadata <- read.csv(file=paste0(baseurl, "corpora/vebi/metadata/csv"), stringsAsFactors = F)
+vb_metadata <- read.csv(file=paste0(baseurl, "corpora/", corpusname, "/metadata/csv"), stringsAsFactors = F)
 vb_metadata <- vb_metadata[order(vb_metadata$id),]
 
 vb_metadata$nodes <- vb_metrics
@@ -231,5 +245,5 @@ vb_metadata$SFT_RusDraCor <- ifelse((vb_metadata$analysis12_pl > vb_metadata$ana
                                       (vb_metadata$analysis12_pl > vb_metadata$analysis12_lin) &
                                       (vb_metadata$analysis12_pl > vb_metadata$analysis12_quad), TRUE, FALSE)
 
-
+# store the results to the results folder
 write.csv(vb_metadata, file = "results/results.csv")

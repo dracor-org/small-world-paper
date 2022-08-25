@@ -1,7 +1,9 @@
 #need to specify version of dockerized R
-FROM rocker/verse:latest
+FROM rocker/verse:4
 # set the API base
 ENV DRACOR_APIBASE=http://localhost:8088/api/
+# set environment variable corpusname
+ENV CORPUSNAME=vebi
 #install the packages; should also later use designated versions!
 RUN R -e "install.packages(c('purrr', 'igraph', 'stringr', 'jsonlite'))"
 #add the script to use in R Studio server instance
