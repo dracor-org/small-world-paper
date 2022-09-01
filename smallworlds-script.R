@@ -9,7 +9,7 @@ sessionInfo()
 
 set.seed(42)
 
-# set API baseurl to value of the evironment variable defined in the Dockerfile/docker-compose file
+# set API baseurl to value of the environment variable defined in the Dockerfile/docker-compose file
 baseurl <- Sys.getenv("DRACOR_APIBASE")
 
 # to run the script locally without Docker and use a local VeBiDraCor instance, set the baseurl to the localhost
@@ -24,24 +24,28 @@ if (corpusname == '') {
   corpusname = "vebi"
 }
 
-
+# downloading and sorting of names of plays in the corpora
 list_of_names <- fromJSON(paste0(baseurl, "corpora/", corpusname))
 sorted_names <- list_of_names$dramas$name[sort.list(list_of_names$dramas$id)]
 
+# a function to get the network metrics for a play
 get_network_data_per_play <- function(play_name){
   json <- fromJSON(paste0(baseurl, "corpora/", corpusname, "/play/", play_name, "/metrics"))
   nodes_data <- json[["nodes"]]
   nodes_data
 }
 
+# adding network metrics to metadata
 vb_metrics <- lapply(sorted_names, get_network_data_per_play)
 
-options(timeout=500)
+options(timeout=500)# it takes a while sometimes to load metadata, so the timeout is increased
 vb_metadata <- read.csv(file=paste0(baseurl, "corpora/", corpusname, "/metadata/csv"), stringsAsFactors = F)
 vb_metadata <- vb_metadata[order(vb_metadata$id),]
 
 vb_metadata$nodes <- vb_metrics
 
+# a function to generate 1000 random graphs with the given number of nodes and number of edges
+# the function return the average clustering coefficient and average path length over 1000 graphs
 randomize_graph <- function(size, numEdges){
   random_graphs=list(1000)
   for (i in 1:1000){
@@ -56,24 +60,26 @@ randomize_graph <- function(size, numEdges){
   return(results)
 }
 
+# getting average metrics of random graphs for each play
 metrics_for_rand_graphs <- mapply(randomize_graph, vb_metadata$size, vb_metadata$numEdges)
 matrix_metrics <- as.data.frame(t(metrics_for_rand_graphs))
 
+# adding columns with random metrics to metadata table
 vb_metadata$CC_rand <- unlist(matrix_metrics$CC_rand)
 vb_metadata$APL_rand <- unlist(matrix_metrics$APL_rand)
 
 vb_metadata <- transform(vb_metadata, CC_dev = averageClustering / CC_rand )
 vb_metadata <- transform(vb_metadata, APL_dev = averagePathLength / APL_rand )
 
-
+# calculating S - the measure for “Small-World-Ness”
 vb_metadata <- transform(vb_metadata, S = CC_dev / APL_dev)
 
-## Analysis 1
+# Analysis 1 (swn1) - categorical application of the small-world-ness measure using the threshold 1
 vb_metadata$analysis1 <- ifelse(vb_metadata$S>1, TRUE, FALSE)
-## Analysis 2
+# Analysis 2 (swn3) - categorical application of the small-world-ness measure using the threshold 3
 vb_metadata$analysis2 <- ifelse(vb_metadata$S>3, TRUE, FALSE)
 
-## Small-World-Test (swt)
+# a function for the Small-World-Test (swt) testing two criteria
 two_criteria <- function(df, analysis){
   if (analysis == 3){
     selected_df <- vb_metadata
@@ -95,12 +101,12 @@ two_criteria <- function(df, analysis){
     selected_df <- vb_metadata[grepl("rus", vb_metadata$id, fixed = TRUE), ]
     df$selected <- ifelse(grepl("rus", vb_metadata$id, fixed = TRUE), TRUE, FALSE)
   }
-  ## Calculating border values
+  # calculating border values
   CC_border <- mean(selected_df$CC_dev, na.rm = TRUE)+2*sd(selected_df$CC_dev, na.rm = TRUE)
   APL_border_min <- mean(selected_df$APL_dev, na.rm = TRUE)-2*sd(selected_df$APL_dev, na.rm = TRUE)
   APL_border_max <- mean(selected_df$APL_dev, na.rm = TRUE)+2*sd(selected_df$APL_dev, na.rm = TRUE)
   
-  ## Applying criteria
+  # applying criteria
   df$crit_1 <- ifelse(df$CC_dev>=CC_border, TRUE, FALSE)
   df$crit_2 <- ifelse((df$crit_1 == TRUE) & (df$APL_dev >= APL_border_min) & (df$APL_dev<=APL_border_max) & (df$selected == TRUE), TRUE, FALSE)
   df$crit_2 <- ifelse((df$selected == FALSE), "X", df$crit_2)
@@ -109,27 +115,28 @@ two_criteria <- function(df, analysis){
   return(df)
 }
 
-## Analysis 3
+# Analysis 3 - Small-World-Test (swt) on VeBiDraCor
 vb_metadata <- two_criteria(vb_metadata, 3)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis3'
 
-## Analysis 5
+# Analysis 5 - Small-World-Test (swt) on VeBiDraCor_Struc
 vb_metadata <- two_criteria(vb_metadata, 5)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis5'
 
-## Analysis 7
+# Analysis 7 - Small-World-Test (swt) on VeBiDraCor_Struc_Hist
 vb_metadata <- two_criteria(vb_metadata, 7)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis7'
 
-## Analysis 9
+# Analysis 9 - Small-World-Test (swt) on GerDraCor
 vb_metadata <- two_criteria(vb_metadata, 9)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis9'
 
-## Analysis 11
+# Analysis 11 - Small-World-Test (swt) on RusDraCor
 vb_metadata <- two_criteria(vb_metadata, 11)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis11'
 
 
+# a function for getting a node-degree distribution of a graph 
 extract_degree <- function(x){
   degree_table <- as.data.frame(table(x$degree))
   degree_table
@@ -143,8 +150,7 @@ num_type <- function(x){
   x
 }
 
-## Scale free test (sft)
-
+# a function for calculating R2 for node-degree distribution for power law, linear quadratic and exponential functions
 node_degree_test <- function(df, analysis){
   if (analysis == 4){
     selected_df <- vb_metadata[vb_metadata$analysis3 == TRUE & !is.na(vb_metadata$analysis3), ]
@@ -162,31 +168,31 @@ node_degree_test <- function(df, analysis){
     selected_df <- vb_metadata[vb_metadata$analysis11 == TRUE & !is.na(vb_metadata$analysis11), ]
   }
   
-  
-  number_of_nodes <- lapply(selected_df$nodes, extract_degree)
+  number_of_nodes <- lapply(selected_df$network_metrics, extract_degree)
   distribution <- lapply(number_of_nodes, as.data.frame)
   distribution <- lapply(number_of_nodes, num_type)
   distribution <- lapply(distribution, na.omit)
   
-  ## Linear
+  # Linear
   fit <- lapply(distribution, function(x) lm(x$Num_of_nodes ~ x$Node_degree))
   selected_df$lin <- sapply (fit, function(x) summary(x)$r.squared)
   
-  ## Power law
+  # Power law
   fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
   selected_df$pl <- sapply (fit, function(x) summary(x)$r.squared)
   
-  ## Quadratic
+  # Quadratic
   fit <- lapply(distribution, function(x) lm(x$Num_of_nodes ~ poly(x$Node_degree, 2)))
   selected_df$quad <- sapply (fit, function(x) summary(x)$r.squared)
   
-  ## Exponential
+  # Exponential
   fit <- lapply(distribution, function(x) lm(x$Num_of_nodes ~ exp(x$Node_degree)))
   selected_df$exp <- sapply (fit, function(x) summary(x)$r.squared)
   
-  return(selected_df[c("id","lin","pl", "quad", "exp")])
+  return(selected_df[c("id","lin","pl","quad","exp")])
 }
 
+# Analysis 4 - calculating R2 on VeBiDraCor
 res <- node_degree_test(vb_metadata, 4)
 vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
 names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis4_lin'
@@ -194,6 +200,7 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis4_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis4_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis4_exp'
 
+# Analysis 6 - calculating R2 on VeBiDraCor_Struc
 res <- node_degree_test(vb_metadata, 6)
 vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
 names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis6_lin'
@@ -201,6 +208,7 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis6_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis6_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis6_exp'
 
+# Analysis 8 - calculating R2 on VeBiDraCor_Struc_Hist
 res <- node_degree_test(vb_metadata, 8)
 vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
 names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis8_lin'
@@ -208,6 +216,7 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis8_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis8_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis8_exp'
 
+# Analysis 10 - calculating R2 on GerDraCor
 res <- node_degree_test(vb_metadata, 10)
 vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
 names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis10_lin'
@@ -215,6 +224,8 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis10_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis10_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis10_exp'
 
+
+# Analysis 12 - calculating R2 on RusDraCor
 res <- node_degree_test(vb_metadata, 12)
 vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
 names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis12_lin'
@@ -222,9 +233,11 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis12_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis12_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis12_exp'
 
-vb_metadata$nodes <- NULL
+vb_metadata$network_metrics <- NULL
 
 
+# the following lines perform Scale Free Test on different corpora:
+# the R2 for power law should be higher than for other functions
 vb_metadata$SFT_VeBiDraCor <- ifelse((vb_metadata$analysis4_pl > vb_metadata$analysis4_exp) &
                                        (vb_metadata$analysis4_pl > vb_metadata$analysis4_lin) &
                                        (vb_metadata$analysis4_pl > vb_metadata$analysis4_quad), TRUE, FALSE)
