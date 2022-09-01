@@ -1,8 +1,8 @@
 # Detecting Small Worlds in a Corpus of Thousands of Theater Plays – A DraCor Study in Comparative Literary Network Analysis
 
-## Abstract
+## Paper Abstract
 
-While homogenized TEI corpora of plays from different languages are becoming more and more available, there has been almost no comparative research on plays in the field of Computational Literary Studies (CLS). Yet the approach of formal network analysis, which has been elaborated in recent years in particular with focus on theatre plays, bears huge potential for comparative research due to its modeling of texts as asemantic structures. An attempt to integrate the paradigm of such a formal analysis with general network research on the one hand and literary history on the other hand is the approach of a typification of networks with respect to the “Small World” concept. However, studies have so far remained limited to smaller and monolingual corpora. In this study, we conceptualize different operationalizations of the “Small World” concept and apply the measures to a quite huge, DraCor based corpus of almost 3000 plays. Looking at the results of these analyses, we examine how the different operationalizations of the “Small World” concept relate to each other and discuss how they could be used for a network-based typology of dramatic forms. We finally develop initial ideas for a network-grounded history of dramatic forms in a transnational perspective.
+Although homogenized TEI corpora of plays from different languages are becoming more and more available, research on plays with a comparative angle is still rare in the field of Computational Literary Studies (CLS). This is where approaches of formal network analysis come into play, which have been elaborated in recent years in particular with focus on theater plays. They bear huge potential for comparative research due to their modeling of texts as asemantic structures. An attempt to integrate the paradigm of such a formal analysis with general network research on the one hand and literary history on the other hand is the approach of a typification of networks with respect to the “Small World” concept. However, studies have so far remained limited to smaller and monolingual corpora. In this study, we conceptualize different operationalizations of the “Small World” concept and apply the measures to a larger, DraCor-based corpus of almost 3,000 plays. Looking at the results of these analyses, we examine how the different operationalizations of the “Small World” concept relate to each other and discuss how they could be used for a network-based typology of dramatic forms. We finally develop initial ideas for a network-grounded history of dramatic forms in a transnational perspective.
 
 ## About this repository
 
@@ -15,9 +15,9 @@ This repository contains the current state of the code and data that will be use
 
 The results of the analysis are contained in the file `results.csv` in the `results` folder.
 
-## Some Notes on re-doing the analysis
+## Some Notes on repeating the analysis
 
-A user wanting to reproduce the analysis or build on the results has two options to re-create the whole environment using the provided docker-compose files (1) `docker-compose.pre.yml` and (2) `docker-compose.post.yml` as described below. It is necessary to have Docker and docker-compose installed.
+A user wanting to repeate the analysis or build on the results has two options to re-create the whole environment using the provided docker-compose files (1) `docker-compose.pre.yml` and (2) `docker-compose.post.yml` as described below. It is necessary to have Docker and docker-compose installed.
 
 ### (1) Pre-analysis state
 
