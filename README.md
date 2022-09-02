@@ -1,6 +1,6 @@
 # Detecting Small Worlds in a Corpus of Thousands of Theater Plays – A DraCor Study in Comparative Literary Network Analysis
 
-This repository contains the code and data used for the paper presented at the "Workshop on Computational Drama Analysis" (September 2022) at Cologne University.
+This repository contains the code and data used for the paper presented at the [Workshop on Computational Drama Analysis](https://quadrama.github.io/blog/2022/03/14/comp-drama-analysis-workshop) (September 2022) at Cologne University.
 
 ## Abstract
 
