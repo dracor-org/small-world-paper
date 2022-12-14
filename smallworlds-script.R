@@ -3,6 +3,7 @@ library("purrr")
 library("igraph")
 library("stringr")
 library("jsonlite")
+library("dplyr")
 
 # Get information on package versions
 sessionInfo()
@@ -38,9 +39,13 @@ get_network_data_per_play <- function(play_name){
 # adding network metrics to metadata
 vb_metrics <- lapply(sorted_names, get_network_data_per_play)
 
-options(timeout=500)# it takes a while sometimes to load metadata, so the timeout is increased
+options(timeout=1000)# it takes a while sometimes to load metadata, so the timeout is increased
 vb_metadata <- read.csv(file=paste0(baseurl, "corpora/", corpusname, "/metadata/csv"), stringsAsFactors = F)
 vb_metadata <- vb_metadata[order(vb_metadata$id),]
+vb_metadata <- subset(vb_metadata, select=-c(numOfCoAuthors, libretto, maxDegreeIds, yearPremiered,
+                                             yearPrinted, maxDegree, numOfSpeakersFemale, numOfSpeakersMale,
+                                             numOfSpeakersUnknown, numPersonGroups, yearWritten, wikipediaLinkCount,
+                                             wordCountText, wordCountSp, wordCountStage, numOfP, numOfL))
 
 vb_metadata$nodes <- vb_metrics
 
@@ -127,14 +132,6 @@ colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis5'
 vb_metadata <- two_criteria(vb_metadata, 7)
 colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis7'
 
-# Analysis 9 - Small-World-Test (swt) on GerDraCor
-vb_metadata <- two_criteria(vb_metadata, 9)
-colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis9'
-
-# Analysis 11 - Small-World-Test (swt) on RusDraCor
-vb_metadata <- two_criteria(vb_metadata, 11)
-colnames(vb_metadata)[colnames(vb_metadata) == 'crit_2'] <- 'analysis11'
-
 
 # a function for getting a node-degree distribution of a graph 
 extract_degree <- function(x){
@@ -161,21 +158,15 @@ node_degree_test <- function(df, analysis){
   if (analysis == 8){
     selected_df <- vb_metadata[vb_metadata$analysis7 == TRUE & !is.na(vb_metadata$analysis7), ]
   }
-  if (analysis == 10){
-    selected_df <- vb_metadata[vb_metadata$analysis9 == TRUE & !is.na(vb_metadata$analysis9), ]
-  }
-  if (analysis == 12){
-    selected_df <- vb_metadata[vb_metadata$analysis11 == TRUE & !is.na(vb_metadata$analysis11), ]
-  }
   
-  number_of_nodes <- lapply(selected_df$network_metrics, extract_degree)
+  number_of_nodes <- lapply(selected_df$nodes, extract_degree)
   distribution <- lapply(number_of_nodes, as.data.frame)
   distribution <- lapply(number_of_nodes, num_type)
   distribution <- lapply(distribution, na.omit)
   
   # Linear
   fit <- lapply(distribution, function(x) lm(x$Num_of_nodes ~ x$Node_degree))
-  selected_df$lin <- sapply (fit, function(x) summary(x)$r.squared)
+  selected_df$lin <- sapply(fit, function(x) summary(x)$r.squared)
   
   # Power law
   fit <- lapply(distribution, function(x) lm(log(x$Num_of_nodes) ~ log(x$Node_degree)))
@@ -216,22 +207,6 @@ names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis8_pl'
 names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis8_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis8_exp'
 
-# Analysis 10 - calculating R2 on GerDraCor
-res <- node_degree_test(vb_metadata, 10)
-vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
-names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis10_lin'
-names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis10_pl'
-names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis10_quad'
-names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis10_exp'
-
-
-# Analysis 12 - calculating R2 on RusDraCor
-res <- node_degree_test(vb_metadata, 12)
-vb_metadata <- merge(vb_metadata, res, by.x = "id", by.y = "id", all.x = TRUE)
-names(vb_metadata)[names(vb_metadata) == 'lin'] <- 'analysis12_lin'
-names(vb_metadata)[names(vb_metadata) == 'pl'] <- 'analysis12_pl'
-names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis12_quad'
-names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis12_exp'
 
 vb_metadata$network_metrics <- NULL
 
@@ -250,13 +225,36 @@ vb_metadata$SFT_VeBiDraCor_Struc_Hist <- ifelse((vb_metadata$analysis8_pl > vb_m
                                                   (vb_metadata$analysis8_pl > vb_metadata$analysis8_lin) &
                                                   (vb_metadata$analysis8_pl > vb_metadata$analysis8_quad), TRUE, FALSE)
 
-vb_metadata$SFT_GerDraCor <- ifelse((vb_metadata$analysis10_pl > vb_metadata$analysis10_exp) &
-                                      (vb_metadata$analysis10_pl > vb_metadata$analysis10_lin) &
-                                      (vb_metadata$analysis10_pl > vb_metadata$analysis10_quad), TRUE, FALSE)
 
-vb_metadata$SFT_RusDraCor <- ifelse((vb_metadata$analysis12_pl > vb_metadata$analysis12_exp) &
-                                      (vb_metadata$analysis12_pl > vb_metadata$analysis12_lin) &
-                                      (vb_metadata$analysis12_pl > vb_metadata$analysis12_quad), TRUE, FALSE)
+vb_metadata <- vb_metadata %>% rename("dracor_id" = "id",
+                                      "filename" = "name",
+                                      "C" = "averageClustering",
+                                      "L" = "averagePathLength",
+                                      "C_rand" = "CC_rand",
+                                      "L_rand" = "APL_rand",
+                                      "C_dev" = "CC_dev",
+                                      "L_dev" = "APL_dev",
+                                      "swn" = "analysis1",
+                                      "swt" = "analysis3",
+                                      "swt_VeBiDraCor_Struc" = "analysis5",
+                                      "swt_VeBiDraCor_Struc_Hist" = "analysis7",
+                                      "sft_VeBiDraCor" = "SFT_VeBiDraCor",
+                                      "sft_VeBiDraCor_lin" = "analysis4_lin",
+                                      "sft_VeBiDraCor_pl" = "analysis4_pl",
+                                      "sft_VeBiDraCor_quad" = "analysis4_quad",
+                                      "sft_VeBiDraCor_exp" = "analysis4_exp",
+                                      "sft_VeBiDraCor_Struc" = "SFT_VeBiDraCor_Struc",
+                                      "sft_VeBiDraCor_Struc_lin" = "analysis6_lin",
+                                      "sft_VeBiDraCor_Struc_pl" = "analysis6_pl",
+                                      "sft_VeBiDraCor_Struc_quad" = "analysis6_quad",
+                                      "sft_VeBiDraCor_Struc_exp" = "analysis6_exp",
+                                      "sft_VeBiDraCor_Struc_Hist" = "SFT_VeBiDraCor_Struc_Hist",
+                                      "sft_VeBiDraCor_Struc_Hist_lin" = "analysis8_lin",
+                                      "sft_VeBiDraCor_Struc_Hist_pl" = "analysis8_pl",
+                                      "sft_VeBiDraCor_Struc_Hist_quad" = "analysis8_quad",
+                                      "sft_VeBiDraCor_Struc_Hist_exp" = "analysis8_exp"
+                                      )
+
 
 # store the results to the results folder (will be synchronized to the host machine if using the docker-compose.pre.yml setup)
 write.csv(vb_metadata, file = "export/results.csv")
