@@ -208,7 +208,7 @@ names(vb_metadata)[names(vb_metadata) == 'quad'] <- 'analysis8_quad'
 names(vb_metadata)[names(vb_metadata) == 'exp'] <- 'analysis8_exp'
 
 
-vb_metadata$network_metrics <- NULL
+vb_metadata$nodes <- NULL
 
 
 # the following lines perform Scale Free Test on different corpora:
